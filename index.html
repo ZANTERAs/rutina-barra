@@ -49,6 +49,12 @@
 
   .ex{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
   .ex.done{border-color:var(--ok)}
+  .ex>summary{list-style:none;cursor:pointer}
+  .ex>summary::-webkit-details-marker{display:none}
+  .ex>summary::before{content:"";flex:none;align-self:center;width:8px;height:8px;margin:0 4px 0 2px;
+    border:solid var(--mut);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .ex:not([open])>summary::before{transform:rotate(-45deg)}
+  .ex>summary .name{flex:1}
   .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
   .name{font-size:17px;font-weight:600}
   .scheme{font-size:14px;color:var(--acc);font-weight:600;white-space:nowrap}
@@ -207,7 +213,7 @@ Object.keys(PLAN).forEach(d=>PLAN[d].forEach(e=>{ ALL[e.id]=e; }));
 /* ================= Estado ================= */
 const KEY = "rutina-barra-v1";
 let S = {
-  day:"A", weights:{}, rest:{}, restSet:{}, auto:true,
+  day:"A", weights:{}, rest:{}, restSet:{}, auto:true, closed:{},
   done:{A:{},B:{}}, reps:{A:{},B:{}},
   log:[]            // [{date, day, ex:{id:{kg, sets:[reps,...]}}, bw?}]
 };
@@ -311,10 +317,13 @@ function renderTrain(){
         </div>`;
     }
 
-    const card = document.createElement("div");
+    const card = document.createElement("details");
     card.className = "ex" + (all ? " done" : "");
+    card.open = !S.closed[ex.id];
+    // "toggle" también salta al crear la tarjeta: guardar solo si cambió
+    card.ontoggle = ()=>{ if(!!S.closed[ex.id] === !card.open) return; S.closed[ex.id] = !card.open; save(); };
     card.innerHTML = `
-      <div class="top"><div class="name">${ex.name}</div><div class="scheme">${ex.sets}×${ex.reps}</div></div>
+      <summary class="top"><span class="name">${ex.name}</span><span class="scheme">${ex.sets}×${ex.reps}</span></summary>
       <div class="note">${ex.note}</div>
       <div class="lastl">${lastLine}</div>
       ${ex.noWeight ? "" : `
