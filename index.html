@@ -62,10 +62,11 @@
   .lastl{font-size:12px;color:var(--mut);margin:0 0 10px}
   .lastl b{color:var(--txt);font-weight:600}
 
-  .wrow,.srow,.rest{display:flex;align-items:center;gap:10px}
+  /* etiqueta | controles | resto: columnas laterales iguales, así los controles quedan centrados y alineados */
+  .wrow,.srow,.rest{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}
+  .mid,.end{display:flex;align-items:center;gap:6px}
   .wrow{margin-bottom:8px;font-size:14px;color:var(--mut)}
-  .wrow label,.srow .sn{min-width:56px}
-  .srow{margin-bottom:8px;font-size:14px;color:var(--mut);gap:6px}
+  .srow{margin-bottom:8px;font-size:14px;color:var(--mut)}
   .u{font-size:13px;color:var(--mut)}
   .wrow input,.srow input{width:76px;padding:10px;border-radius:10px;border:1px solid var(--line);
     background:var(--bg);color:var(--txt);font-size:16px;text-align:center}
@@ -76,7 +77,6 @@
   .chk.on{background:var(--ok);border-color:var(--ok);color:#06150e}
 
   .rest{margin-top:8px;color:var(--mut);font-size:14px}
-  .rest span{min-width:118px}
   .rest b{min-width:44px;text-align:center;color:var(--txt);font-size:16px;font-variant-numeric:tabular-nums}
   .st{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-size:20px}
   .fin{width:100%;margin-top:12px;padding:13px;border-radius:12px;border:0;background:var(--acc);color:#fff;font-size:16px;font-weight:700}
@@ -309,11 +309,15 @@ function renderTrain(){
       rows += `
         <div class="srow">
           <label class="sn" for="r-${ex.id}-${i}">Serie ${i+1}</label>
-          <button class="st" data-rs="${-step}" aria-label="Menos ${u} en serie ${i+1}">−</button>
-          <input id="r-${ex.id}-${i}" name="reps" type="number" inputmode="numeric" min="0" autocomplete="off" value="${repsVal(ex,i)}" data-rep="${ex.id}" data-i="${i}">
-          <button class="st" data-rs="${step}" aria-label="Más ${u} en serie ${i+1}">+</button>
-          <span class="u">${u}</span>
-          <button class="chk ${done[i]?"on":""}" data-ex="${ex.id}" data-i="${i}" aria-label="Serie ${i+1} hecha" aria-pressed="${!!done[i]}">✓</button>
+          <span class="mid">
+            <button class="st" data-rs="${-step}" aria-label="Menos ${u} en serie ${i+1}">−</button>
+            <input id="r-${ex.id}-${i}" name="reps" type="number" inputmode="numeric" min="0" autocomplete="off" value="${repsVal(ex,i)}" data-rep="${ex.id}" data-i="${i}">
+            <button class="st" data-rs="${step}" aria-label="Más ${u} en serie ${i+1}">+</button>
+          </span>
+          <span class="end">
+            <span class="u">${u}</span>
+            <button class="chk ${done[i]?"on":""}" data-ex="${ex.id}" data-i="${i}" aria-label="Serie ${i+1} hecha" aria-pressed="${!!done[i]}">✓</button>
+          </span>
         </div>`;
     }
 
@@ -333,15 +337,19 @@ function renderTrain(){
       ${rows}
       <div class="rest">
         <span>Entre series</span>
-        <button class="st" data-key="set" data-step="-15" data-id="${ex.id}" aria-label="Menos tiempo entre series">−</button>
-        <b>${fmt(restSetFor(ex.id))}</b>
-        <button class="st" data-key="set" data-step="15" data-id="${ex.id}" aria-label="Más tiempo entre series">+</button>
+        <span class="mid">
+          <button class="st" data-key="set" data-step="-15" data-id="${ex.id}" aria-label="Menos tiempo entre series">−</button>
+          <b>${fmt(restSetFor(ex.id))}</b>
+          <button class="st" data-key="set" data-step="15" data-id="${ex.id}" aria-label="Más tiempo entre series">+</button>
+        </span>
       </div>
       <div class="rest">
         <span>Entre ejercicios</span>
-        <button class="st" data-key="ex" data-step="-15" data-id="${ex.id}" aria-label="Menos tiempo entre ejercicios">−</button>
-        <b>${fmt(restFor(ex.id))}</b>
-        <button class="st" data-key="ex" data-step="15" data-id="${ex.id}" aria-label="Más tiempo entre ejercicios">+</button>
+        <span class="mid">
+          <button class="st" data-key="ex" data-step="-15" data-id="${ex.id}" aria-label="Menos tiempo entre ejercicios">−</button>
+          <b>${fmt(restFor(ex.id))}</b>
+          <button class="st" data-key="ex" data-step="15" data-id="${ex.id}" aria-label="Más tiempo entre ejercicios">+</button>
+        </span>
       </div>
       <button class="fin" data-fin="${ex.id}"><span aria-hidden="true">✓</span> Terminar ejercicio</button>`;
     list.appendChild(card);
