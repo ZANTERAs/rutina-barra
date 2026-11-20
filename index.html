@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rutina">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
 <style>
   :root{
     --bg:#0f1115; --card:#1a1d24; --line:#2a2e38; --txt:#eef0f4; --mut:#9097a5;
@@ -651,7 +652,8 @@ function renderDash(){
   }
   html += `<details class="bk">
     <summary>Copia de seguridad</summary>
-    <p>Tus datos viven solo en este teléfono. Copialos de vez en cuando y guardalos en una nota por si cambiás de teléfono o borrás los datos del navegador.</p>
+    <p>Tus datos viven solo en este teléfono. Descargá una copia de vez en cuando (o copiala a una nota) por si cambiás de teléfono o borrás los datos del navegador.</p>
+    <button id="bkFile">Descargar copia (.json)</button>
     <button id="bkCopy">Copiar tus datos</button>
     <textarea id="bkTxt" rows="4" aria-label="Copia de seguridad a restaurar" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Para restaurar, pegá acá una copia guardada…"></textarea>
     <button id="bkRest">Restaurar desde el texto</button>
@@ -664,6 +666,14 @@ function renderDash(){
     save(); renderDash();
   }));
   const msg = t => { $("#bkMsg").textContent = t; say(t); };
+  $("#bkFile").onclick = ()=>{
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(S.log, null, 2)], {type:"application/json"}));
+    a.download = `rutina-barra-${new Date().toLocaleDateString("sv")}.json`;   // "sv" da AAAA-MM-DD en hora local
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 60000);   // iOS puede leer el archivo tarde
+    msg("Copia descargada ✓");
+  };
   $("#bkCopy").onclick = ()=>{
     const txt = JSON.stringify(S.log);
     const ta = $("#bkTxt");
