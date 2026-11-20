@@ -59,11 +59,13 @@
   .wrow,.srow,.rest{display:flex;align-items:center;gap:10px}
   .wrow{margin-bottom:8px;font-size:14px;color:var(--mut)}
   .wrow label,.srow .sn{min-width:56px}
-  .srow{margin-bottom:8px;font-size:14px;color:var(--mut)}
+  .srow{margin-bottom:8px;font-size:14px;color:var(--mut);gap:6px}
   .u{font-size:13px;color:var(--mut)}
   .wrow input,.srow input{width:76px;padding:10px;border-radius:10px;border:1px solid var(--line);
     background:var(--bg);color:var(--txt);font-size:16px;text-align:center}
-  .chk{margin-left:auto;width:48px;height:44px;border-radius:12px;border:2px solid var(--line);
+  .srow input{width:44px;padding:10px 2px;appearance:textfield;-moz-appearance:textfield}
+  .srow input::-webkit-inner-spin-button,.srow input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  .chk{margin-left:auto;width:44px;height:44px;border-radius:12px;border:2px solid var(--line);
     background:transparent;color:var(--mut);font-size:18px;font-weight:700}
   .chk.on{background:var(--ok);border-color:var(--ok);color:#06150e}
 
@@ -296,12 +298,14 @@ function renderTrain(){
       ? `Última vez (${fdate(l.date)}): <b>${(!ex.noWeight && l.kg) ? nf(l.kg)+" kg · " : ""}${l.sets.join(" / ")} ${u}</b>`
       : `Primera vez: todavía sin registro`;
 
-    let rows = "";
+    let rows = "", step = u==="seg" ? 5 : 1;   // la plancha va de a 5 segundos
     for(let i=0;i<ex.sets;i++){
       rows += `
         <div class="srow">
           <label class="sn" for="r-${ex.id}-${i}">Serie ${i+1}</label>
+          <button class="st" data-rs="${-step}" aria-label="Menos ${u} en serie ${i+1}">−</button>
           <input id="r-${ex.id}-${i}" name="reps" type="number" inputmode="numeric" min="0" autocomplete="off" value="${repsVal(ex,i)}" data-rep="${ex.id}" data-i="${i}">
+          <button class="st" data-rs="${step}" aria-label="Más ${u} en serie ${i+1}">+</button>
           <span class="u">${u}</span>
           <button class="chk ${done[i]?"on":""}" data-ex="${ex.id}" data-i="${i}" aria-label="Serie ${i+1} hecha" aria-pressed="${!!done[i]}">✓</button>
         </div>`;
@@ -356,6 +360,12 @@ function renderTrain(){
       if(n >= ex.sets) afterExercise(ex);
       else startRest(`Entre series · ${ex.name} (${n}/${ex.sets})`, restSetFor(id));
     }
+  });
+  list.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>{
+    const inp = b.parentNode.querySelector("input"), id = inp.dataset.rep, i = +inp.dataset.i;
+    setRep(id, i, (parseInt(inp.value,10) || 0) + (+b.dataset.rs));
+    inp.value = S.reps[S.day][id][i];   // setRep ya no deja bajar de 0
+    save();
   });
   list.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{
     const id = b.dataset.id;
